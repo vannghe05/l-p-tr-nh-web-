@@ -6,7 +6,9 @@ const router = express.Router();
 router.get("/:id", async (request, response) => {
   const { user_id } = request.params.id;
   try {
-    const photos = await Photo.find(user_id);
+    const photos = await Photo.find(user_id)
+      .populate("user_id")
+      .populate("comments.user_id"); // <--- Lệnh thần thánh ở đây
     response.status(200).json(photos);
   } catch (error) {
     response.status(500).send({ message: error.message });
