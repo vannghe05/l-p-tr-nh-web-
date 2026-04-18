@@ -4,13 +4,12 @@ const router = express.Router();
 
 // 1. Lấy danh sách tất cả ảnh (GET /photos)
 router.get("/:id", async (request, response) => {
+  const { user_id } = request.params.id;
   try {
-    const photos = await Photo.find({ user_id: id });
+    const photos = await Photo.find(user_id);
     response.status(200).json(photos);
   } catch (error) {
-    response
-      .status(500)
-      .send({ message: "Lỗi server khi lấy dữ liệu ảnh", error });
+    response.status(500).send({ message: error.message });
   }
 });
 
