@@ -12,6 +12,9 @@ const versionString = "1.0";
 async function dbLoad() {
   try {
     await mongoose.connect(process.env.DB_URL);
+    await User.deleteMany({});
+    await Photo.deleteMany({});
+    await SchemaInfo.deleteMany({});
     console.log("Successfully connected to MongoDB Atlas!");
   } catch (error) {
     console.log("Unable connecting to MongoDB Atlas!");
@@ -25,7 +28,7 @@ async function dbLoad() {
   const mapFakeId2RealId = {};
   for (const user of userModels) {
     userObj = new User({
-      first: user.first_name,
+      first_name: user.first_name,
       last_name: user.last_name,
       location: user.location,
       description: user.description,
@@ -39,7 +42,7 @@ async function dbLoad() {
         "Adding user:",
         user.first_name + " " + user.last_name,
         " with ID ",
-        user.objectID,
+        user.objectID
       );
     } catch (error) {
       console.error("Error create user", error);
@@ -70,7 +73,7 @@ async function dbLoad() {
           "Adding comment of length %d by user %s to photo %s",
           comment.comment.length,
           comment.user.objectID,
-          photo.file_name,
+          photo.file_name
         );
       });
     }
@@ -80,7 +83,7 @@ async function dbLoad() {
         "Adding photo:",
         photo.file_name,
         " of user ID ",
-        photoObj.user_id,
+        photoObj.user_id
       );
     } catch (error) {
       console.error("Error create photo", error);
