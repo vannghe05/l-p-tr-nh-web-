@@ -1,56 +1,87 @@
-import React from "react";
-import { Typography } from "@mui/material";
-import { Link, useParams } from "react-router-dom";
-import models from "../../modelData/models";
+import React, { useState, useEffect } from "react";
+import {
+  Typography,
+  Card,
+  CardHeader,
+  CardMedia,
+  CardContent,
+  Divider,
+} from "@mui/material";
+import { useParams, Link } from "react-router-dom";
+import fetchModel from "../../lib/fetchModelData";
 import "./styles.css";
 
 function UserPhotos() {
-  
   const { userId } = useParams();
-  
-  
-  const photos = models.photoOfUserModel(userId);
+  // 1. Khởi tạo state là mảng rỗng để chứa danh sách ảnh
+  const [photos, setPhotos] = useState([]);
 
-  
+  // 2. useEffect để lấy ảnh từ Server
+  useEffect(() => {
+    const getPhotos = async () => {
+      try {
+        const response = await fetchModel(
+          `https://82w65g-8081.csb.app/api/photo/${userId}`
+        );
+        setPhotos(response.data);
+      } catch (error) {
+        console.error("Lỗi khi lấy ảnh:", error);
+      }
+    };
+    getPhotos();
+  }, [userId]);
+
   if (!photos || photos.length === 0) {
-    return <Typography variant="h6">Người dùng này chưa có ảnh nào.</Typography>;
+    return (
+      <Typography variant="h6">Người dùng này chưa có ảnh nào!</Typography>
+    );
   }
 
-  
   return (
-    <div className="photos-container">
-      <h1 className="main-title">Ảnh của người dùng</h1>
-
+    <div className="user-photos-container">
       {photos.map((photo) => (
-        <div key={photo._id} className="photo-card">
-          <img 
-            src={require(`../../images/${photo.file_name}`)} 
-            alt="User photo" 
-            className="user-img"
+        <Card key={photo._id} style={{ marginBottom: "20px" }}>
+          <CardHeader
+            title={`Ngày đăng: ${new Date(photo.date_time).toLocaleString()}`}
           />
-          <div className="photo-info">
-            <small className="post-date">
-              Ngày đăng: {new Date(photo.date_time).toLocaleString()}
-            </small>
-            <hr className="divider" />
-            <h3 className="comment-title">Bình luận:</h3>
-            {photo.comments ? photo.comments.map((comment) => (
-              <div key={comment._id} className="comment-box">
-                <p className="comment-user">
-                  <Link to={`/users/${comment.user._id}`} className="author-link">
-                    {comment.user.first_name} {comment.user.last_name}
-                  </Link>
-                  <span className="comment-date">
-                    ({new Date(comment.date_time).toLocaleString()})
-                  </span>
-                </p>
-                <p className="comment-text">{comment.comment}</p>
-              </div>
-            )) : (
-              <p className="no-comment">Chưa có bình luận nào.</p>
+
+          {/* 3. Hiển thị ảnh từ thư mục public/images */}
+          <CardMedia
+            component="img"
+            height="auto"
+            image={require(`../../images/${photo.file_name}`)}
+            alt={photo.file_name}
+          />
+
+          <CardContent>
+            <Typography variant="h6">Bình luận:</Typography>
+            <Divider style={{ margin: "10px 0" }} />
+
+            {/* 4. Duyệt mảng comments lồng bên trong mỗi bức ảnh */}
+            {photo.comments && photo.comments.length > 0 ? (
+              photo.comments.map((c) => (
+                <div key={c._id} style={{ marginBottom: "10px" }}>
+                  <Typography variant="body2">
+                    {/* Link đến trang cá nhân của người bình luận */}
+                    <Link to={`/users/${c.user_id._id}`}>
+                      <strong>
+                        {c.user_id.first_name} {c.user_id.last_name}:{" "}
+                      </strong>
+                    </Link>
+                    {c.comment}
+                  </Typography>
+                  <Typography variant="caption" color="textSecondary">
+                    {new Date(c.date_time).toLocaleString()}
+                  </Typography>
+                </div>
+              ))
+            ) : (
+              <Typography variant="body2" color="textSecondary">
+                Chưa có bình luận nào.
+              </Typography>
             )}
-          </div>
-        </div>
+          </CardContent>
+        </Card>
       ))}
     </div>
   );
