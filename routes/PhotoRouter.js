@@ -16,7 +16,7 @@ router.get("/:id", async (request, response) => {
 });
 
 // 2. Thêm một ảnh mới (POST /photos)
-router.post("/", async (request, response) => {
+router.post("/list", async (request, response) => {
   try {
     const { file_name, date_time, user_id, comments } = request.body;
 
